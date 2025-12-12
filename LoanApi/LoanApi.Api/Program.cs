@@ -1,5 +1,6 @@
 using LoanApi.Api.Configurations;
 using LoanApi.Api.Middleware;
+using LoanApi.Infrastructure.Persistence;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,8 @@ builder.Host.UseSerilog((context, services, loggerConfiguration) =>
 builder.Services.AddApiServices(builder.Configuration);
 
 var app = builder.Build();
+
+await DatabaseSeeder.SeedAccountantUserAsync(app.Services);
 
 app.UseSerilogRequestLogging();
 
