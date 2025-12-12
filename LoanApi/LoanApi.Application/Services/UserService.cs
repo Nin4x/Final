@@ -1,5 +1,6 @@
 using AutoMapper;
 using LoanApi.Application.DTOs;
+using LoanApi.Application.Exceptions;
 using LoanApi.Application.Interfaces;
 using LoanApi.Domain.Enums;
 
@@ -18,23 +19,22 @@ public class UserService : IUserService
         _mapper = mapper;
     }
 
-    public async Task<UserResponse?> GetByIdAsync(Guid id, Guid currentUserId, UserRole currentUserRole, CancellationToken cancellationToken = default)
+    public async Task<UserResponse> GetByIdAsync(Guid id, Guid currentUserId, UserRole currentUserRole, CancellationToken cancellationToken = default)
     {
         EnsureAccountantOrOwner(id, currentUserId, currentUserRole, "Users can only view their own profile.");
 
-        var user = await _userRepository.GetByIdAsync(id, cancellationToken);
-        return user is null ? null : _mapper.Map<UserResponse>(user);
+        var user = await _userRepository.GetByIdAsync(id, cancellationToken)
+            ?? throw new NotFoundException("User not found.");
+
+        return _mapper.Map<UserResponse>(user);
     }
 
-    public async Task<UserResponse?> SetBlockStatusAsync(Guid id, bool isBlocked, Guid currentUserId, UserRole currentUserRole, CancellationToken cancellationToken = default)
+    public async Task<UserResponse> SetBlockStatusAsync(Guid id, bool isBlocked, Guid currentUserId, UserRole currentUserRole, CancellationToken cancellationToken = default)
     {
         EnsureAccountant(currentUserRole, "Only accountants can update user block status.");
 
-        var user = await _userRepository.GetByIdAsync(id, cancellationToken);
-        if (user is null)
-        {
-            return null;
-        }
+        var user = await _userRepository.GetByIdAsync(id, cancellationToken)
+            ?? throw new NotFoundException("User not found.");
 
         user.IsBlocked = isBlocked;
         user.UpdatedOnUtc = _dateTimeProvider.UtcNow;
@@ -48,7 +48,7 @@ public class UserService : IUserService
     {
         if (currentUserRole != UserRole.Accountant)
         {
-            throw new UnauthorizedAccessException(message);
+            throw new ForbiddenException(message);
         }
     }
 
@@ -56,7 +56,7 @@ public class UserService : IUserService
     {
         if (currentUserRole != UserRole.Accountant && targetUserId != currentUserId)
         {
-            throw new UnauthorizedAccessException(message);
+            throw new ForbiddenException(message);
         }
     }
 }

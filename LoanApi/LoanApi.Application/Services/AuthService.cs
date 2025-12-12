@@ -1,10 +1,12 @@
 using AutoMapper;
 using FluentValidation;
 using LoanApi.Application.DTOs;
+using LoanApi.Application.Exceptions;
 using LoanApi.Application.Interfaces;
 using LoanApi.Domain.Entities;
 using LoanApi.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
+using System.Linq;
 
 namespace LoanApi.Application.Services;
 
@@ -38,14 +40,14 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
     {
-        await _registerValidator.ValidateAndThrowAsync(request, cancellationToken);
+        await ValidateRequest(_registerValidator, request, cancellationToken);
 
         var existingUser = await _userRepository.GetByUsernameAsync(request.Username, cancellationToken)
             ?? await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
 
         if (existingUser is not null)
         {
-            throw new ValidationException("Username or email is already in use.");
+            throw new BadRequestException("Username or email is already in use.");
         }
 
         var user = new User
@@ -69,24 +71,40 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
-        await _loginValidator.ValidateAndThrowAsync(request, cancellationToken);
+        await ValidateRequest(_loginValidator, request, cancellationToken);
 
         var user = await _userRepository.GetByUsernameAsync(request.UsernameOrEmail, cancellationToken)
             ?? await _userRepository.GetByEmailAsync(request.UsernameOrEmail, cancellationToken);
         if (user is null)
         {
-            throw new ValidationException("Invalid credentials.");
+            throw new BadRequestException("Invalid credentials.");
         }
 
         var passwordVerification = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
         if (passwordVerification == PasswordVerificationResult.Failed)
         {
-            throw new ValidationException("Invalid credentials.");
+            throw new BadRequestException("Invalid credentials.");
         }
 
         var tokenResult = _jwtTokenGenerator.GenerateToken(user);
         var userResponse = _mapper.Map<UserResponse>(user);
 
         return new AuthResponse(tokenResult.AccessToken, tokenResult.ExpiresOnUtc, userResponse);
+    }
+
+    private static async Task ValidateRequest<T>(IValidator<T> validator, T request, CancellationToken cancellationToken)
+    {
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (validationResult.IsValid)
+        {
+            return;
+        }
+
+        var errors = validationResult.Errors
+            .GroupBy(error => error.PropertyName)
+            .ToDictionary(group => group.Key, group => group.Select(error => error.ErrorMessage).ToArray());
+
+        throw new BadRequestException("Validation failed.", errors);
     }
 }

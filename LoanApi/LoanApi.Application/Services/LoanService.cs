@@ -1,9 +1,11 @@
 using AutoMapper;
 using FluentValidation;
 using LoanApi.Application.DTOs;
+using LoanApi.Application.Exceptions;
 using LoanApi.Application.Interfaces;
 using LoanApi.Domain.Entities;
 using LoanApi.Domain.Enums;
+using System.Linq;
 
 namespace LoanApi.Application.Services;
 
@@ -37,14 +39,14 @@ public class LoanService : ILoanService
 
     public async Task<LoanResponse> CreateAsync(Guid currentUserId, UserRole currentUserRole, CreateLoanRequest request, CancellationToken cancellationToken = default)
     {
-        await _createValidator.ValidateAndThrowAsync(request, cancellationToken);
+        await ValidateRequest(_createValidator, request, cancellationToken);
 
         var user = await _userRepository.GetByIdAsync(currentUserId, cancellationToken)
-            ?? throw new ValidationException("User not found.");
+            ?? throw new NotFoundException("User not found.");
 
         if (currentUserRole == UserRole.User && user.IsBlocked)
         {
-            throw new ValidationException("Blocked users cannot create loans.");
+            throw new ForbiddenException("Blocked users cannot create loans.");
         }
 
         var loan = _mapper.Map<Loan>(request);
@@ -64,42 +66,42 @@ public class LoanService : ILoanService
         return loans.Select(loan => _mapper.Map<LoanResponse>(loan)).ToList();
     }
 
-    public async Task<LoanResponse?> GetAsync(Guid id, Guid currentUserId, UserRole currentUserRole, CancellationToken cancellationToken = default)
+    public async Task<LoanResponse> GetAsync(Guid id, Guid currentUserId, UserRole currentUserRole, CancellationToken cancellationToken = default)
     {
         var loan = await _repository.GetByIdAsync(id, cancellationToken);
         if (loan is null)
         {
-            return null;
+            throw new NotFoundException("Loan not found.");
         }
 
         if (currentUserRole != UserRole.Accountant && loan.UserId != currentUserId)
         {
-            throw new UnauthorizedAccessException("You are not allowed to view this loan.");
+            throw new ForbiddenException("You are not allowed to view this loan.");
         }
 
         return _mapper.Map<LoanResponse>(loan);
     }
 
-    public async Task<LoanResponse?> UpdateAsync(Guid id, Guid currentUserId, UserRole currentUserRole, UpdateLoanRequest request, CancellationToken cancellationToken = default)
+    public async Task<LoanResponse> UpdateAsync(Guid id, Guid currentUserId, UserRole currentUserRole, UpdateLoanRequest request, CancellationToken cancellationToken = default)
     {
-        await _updateValidator.ValidateAndThrowAsync(request, cancellationToken);
+        await ValidateRequest(_updateValidator, request, cancellationToken);
 
         var loan = await _repository.GetByIdAsync(id, cancellationToken);
         if (loan is null)
         {
-            return null;
+            throw new NotFoundException("Loan not found.");
         }
 
         if (currentUserRole != UserRole.Accountant)
         {
             if (loan.UserId != currentUserId)
             {
-                throw new UnauthorizedAccessException("You are not allowed to update this loan.");
+                throw new ForbiddenException("You are not allowed to update this loan.");
             }
 
             if (loan.Status != LoanStatus.Processing)
             {
-                throw new ValidationException("Only processing loans can be updated.");
+                throw new BadRequestException("Only processing loans can be updated.");
             }
         }
 
@@ -110,19 +112,19 @@ public class LoanService : ILoanService
         return _mapper.Map<LoanResponse>(loan);
     }
 
-    public async Task<LoanResponse?> UpdateStatusAsync(Guid id, Guid currentUserId, UserRole currentUserRole, UpdateLoanStatusRequest request, CancellationToken cancellationToken = default)
+    public async Task<LoanResponse> UpdateStatusAsync(Guid id, Guid currentUserId, UserRole currentUserRole, UpdateLoanStatusRequest request, CancellationToken cancellationToken = default)
     {
-        await _statusValidator.ValidateAndThrowAsync(request, cancellationToken);
+        await ValidateRequest(_statusValidator, request, cancellationToken);
 
         if (currentUserRole != UserRole.Accountant)
         {
-            throw new UnauthorizedAccessException("Only accountants can update loan status.");
+            throw new ForbiddenException("Only accountants can update loan status.");
         }
 
         var loan = await _repository.GetByIdAsync(id, cancellationToken);
         if (loan is null)
         {
-            return null;
+            throw new NotFoundException("Loan not found.");
         }
 
         loan.Status = request.Status;
@@ -132,28 +134,43 @@ public class LoanService : ILoanService
         return _mapper.Map<LoanResponse>(loan);
     }
 
-    public async Task<bool> DeleteAsync(Guid id, Guid currentUserId, UserRole currentUserRole, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(Guid id, Guid currentUserId, UserRole currentUserRole, CancellationToken cancellationToken = default)
     {
         var loan = await _repository.GetByIdAsync(id, cancellationToken);
         if (loan is null)
         {
-            return false;
+            throw new NotFoundException("Loan not found.");
         }
 
         if (currentUserRole != UserRole.Accountant)
         {
             if (loan.UserId != currentUserId)
             {
-                throw new UnauthorizedAccessException("You are not allowed to delete this loan.");
+                throw new ForbiddenException("You are not allowed to delete this loan.");
             }
 
             if (loan.Status != LoanStatus.Processing)
             {
-                throw new ValidationException("Only processing loans can be deleted by the owner.");
+                throw new BadRequestException("Only processing loans can be deleted by the owner.");
             }
         }
 
         await _repository.DeleteAsync(loan, cancellationToken);
-        return true;
+    }
+
+    private static async Task ValidateRequest<T>(IValidator<T> validator, T request, CancellationToken cancellationToken)
+    {
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (validationResult.IsValid)
+        {
+            return;
+        }
+
+        var errors = validationResult.Errors
+            .GroupBy(error => error.PropertyName)
+            .ToDictionary(group => group.Key, group => group.Select(error => error.ErrorMessage).ToArray());
+
+        throw new BadRequestException("Validation failed.", errors);
     }
 }

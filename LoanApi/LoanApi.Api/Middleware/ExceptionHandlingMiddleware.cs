@@ -1,8 +1,9 @@
 using System.Net;
 using System.Text.Json;
 using FluentValidation;
-using Microsoft.AspNetCore.Diagnostics;
+using LoanApi.Application.Exceptions;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace LoanApi.Api.Middleware;
 
@@ -30,28 +31,41 @@ public class ExceptionHandlingMiddleware : IMiddleware
 
     private static Task WriteProblemDetailsAsync(HttpContext context, Exception ex)
     {
-        var statusCode = ex switch
+        var (statusCode, title, detail, errors) = ex switch
         {
-            ValidationException => HttpStatusCode.BadRequest,
-            UnauthorizedAccessException => HttpStatusCode.Forbidden,
-            _ => HttpStatusCode.InternalServerError
-        };
-
-        var detail = ex switch
-        {
-            ValidationException validationException => string.Join(" ", validationException.Errors.Select(error => error.ErrorMessage)),
-            UnauthorizedAccessException unauthorizedAccessException => unauthorizedAccessException.Message,
-            ArgumentException argumentException => argumentException.Message,
-            _ => "Please contact support if the issue persists."
+            BadRequestException badRequestException =>
+                (HttpStatusCode.BadRequest, "Bad Request", badRequestException.Message, badRequestException.Errors),
+            NotFoundException notFoundException =>
+                (HttpStatusCode.NotFound, "Not Found", notFoundException.Message, default(IReadOnlyDictionary<string, string[]>?)),
+            ForbiddenException forbiddenException =>
+                (HttpStatusCode.Forbidden, "Forbidden", forbiddenException.Message, default(IReadOnlyDictionary<string, string[]>?)),
+            ValidationException validationException =>
+                (
+                    HttpStatusCode.BadRequest,
+                    "Validation failed.",
+                    "One or more validation errors occurred.",
+                    validationException.Errors
+                        .GroupBy(error => error.PropertyName)
+                        .ToDictionary(group => group.Key, group => group.Select(error => error.ErrorMessage).ToArray())
+                ),
+            UnauthorizedAccessException unauthorizedAccessException =>
+                (HttpStatusCode.Forbidden, "Forbidden", unauthorizedAccessException.Message, default(IReadOnlyDictionary<string, string[]>?)),
+            _ =>
+                (HttpStatusCode.InternalServerError, "Internal Server Error", "An unexpected error occurred. Please contact support if the issue persists.", default(IReadOnlyDictionary<string, string[]>?))
         };
 
         var problemDetails = new ProblemDetails
         {
-            Title = statusCode == HttpStatusCode.BadRequest ? "Validation failed." : "An unexpected error occurred.",
+            Title = title,
             Status = (int)statusCode,
             Detail = detail,
             Instance = context.Request.Path
         };
+
+        if (errors is not null && errors.Any())
+        {
+            problemDetails.Extensions["errors"] = errors;
+        }
 
         context.Response.StatusCode = problemDetails.Status.Value;
         context.Response.ContentType = "application/problem+json";
