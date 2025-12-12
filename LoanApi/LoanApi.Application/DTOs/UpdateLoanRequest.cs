@@ -1,7 +1,11 @@
+using LoanApi.Domain.Enums;
+
 namespace LoanApi.Application.DTOs;
 
 public record UpdateLoanRequest(
-    string BorrowerName,
     decimal Amount,
+    LoanCurrency Currency,
+    int PeriodMonths,
+    LoanType Type,
     decimal InterestRate,
-    int TermMonths);
+    string BorrowerName);

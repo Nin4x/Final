@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,11 +30,19 @@ public class ExceptionHandlingMiddleware : IMiddleware
 
     private static Task WriteProblemDetailsAsync(HttpContext context, Exception ex)
     {
+        var statusCode = ex is ValidationException ? HttpStatusCode.BadRequest : HttpStatusCode.InternalServerError;
+        var detail = ex switch
+        {
+            ValidationException validationException => string.Join(" ", validationException.Errors.Select(error => error.ErrorMessage)),
+            ArgumentException argumentException => argumentException.Message,
+            _ => "Please contact support if the issue persists."
+        };
+
         var problemDetails = new ProblemDetails
         {
-            Title = "An unexpected error occurred.",
-            Status = (int)HttpStatusCode.InternalServerError,
-            Detail = ex is ArgumentException ? ex.Message : "Please contact support if the issue persists.",
+            Title = statusCode == HttpStatusCode.BadRequest ? "Validation failed." : "An unexpected error occurred.",
+            Status = (int)statusCode,
+            Detail = detail,
             Instance = context.Request.Path
         };
 

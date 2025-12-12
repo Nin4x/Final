@@ -1,7 +1,7 @@
 using AutoMapper;
+using FluentValidation;
 using LoanApi.Application.DTOs;
 using LoanApi.Application.Interfaces;
-using LoanApi.Application.Validation;
 using LoanApi.Domain.Entities;
 using LoanApi.Domain.Enums;
 
@@ -11,17 +11,17 @@ public class LoanService : ILoanService
 {
     private readonly ILoanRepository _repository;
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly CreateLoanRequestValidator _createValidator;
-    private readonly UpdateLoanRequestValidator _updateValidator;
-    private readonly UpdateLoanStatusRequestValidator _statusValidator;
+    private readonly IValidator<CreateLoanRequest> _createValidator;
+    private readonly IValidator<UpdateLoanRequest> _updateValidator;
+    private readonly IValidator<UpdateLoanStatusRequest> _statusValidator;
     private readonly IMapper _mapper;
 
     public LoanService(
         ILoanRepository repository,
         IDateTimeProvider dateTimeProvider,
-        CreateLoanRequestValidator createValidator,
-        UpdateLoanRequestValidator updateValidator,
-        UpdateLoanStatusRequestValidator statusValidator,
+        IValidator<CreateLoanRequest> createValidator,
+        IValidator<UpdateLoanRequest> updateValidator,
+        IValidator<UpdateLoanStatusRequest> statusValidator,
         IMapper mapper)
     {
         _repository = repository;
@@ -34,11 +34,7 @@ public class LoanService : ILoanService
 
     public async Task<LoanResponse> CreateAsync(CreateLoanRequest request, CancellationToken cancellationToken = default)
     {
-        var validationResult = _createValidator.Validate(request);
-        if (!validationResult.IsValid)
-        {
-            throw new ArgumentException(string.Join(" ", validationResult.Errors));
-        }
+        await _createValidator.ValidateAndThrowAsync(request, cancellationToken);
 
         var loan = _mapper.Map<Loan>(request);
         loan.Id = Guid.NewGuid();
@@ -62,11 +58,7 @@ public class LoanService : ILoanService
 
     public async Task<LoanResponse?> UpdateAsync(Guid id, UpdateLoanRequest request, CancellationToken cancellationToken = default)
     {
-        var validationResult = _updateValidator.Validate(request);
-        if (!validationResult.IsValid)
-        {
-            throw new ArgumentException(string.Join(" ", validationResult.Errors));
-        }
+        await _updateValidator.ValidateAndThrowAsync(request, cancellationToken);
 
         var loan = await _repository.GetByIdAsync(id, cancellationToken);
         if (loan is null)
@@ -83,11 +75,7 @@ public class LoanService : ILoanService
 
     public async Task<LoanResponse?> UpdateStatusAsync(Guid id, UpdateLoanStatusRequest request, CancellationToken cancellationToken = default)
     {
-        var validationResult = _statusValidator.Validate(request);
-        if (!validationResult.IsValid)
-        {
-            throw new ArgumentException(string.Join(" ", validationResult.Errors));
-        }
+        await _statusValidator.ValidateAndThrowAsync(request, cancellationToken);
 
         var loan = await _repository.GetByIdAsync(id, cancellationToken);
         if (loan is null)

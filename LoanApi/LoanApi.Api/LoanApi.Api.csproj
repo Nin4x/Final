@@ -5,11 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <ProjectReference Include="..\LoanApi.Application\LoanApi.Application.csproj" />
+    <ProjectReference Include="..\LoanApi.Infrastructure\LoanApi.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\\LoanApi.Application\\LoanApi.Application.csproj" />
-    <ProjectReference Include="..\\LoanApi.Infrastructure\\LoanApi.Infrastructure.csproj" />
-    <ProjectReference Include="..\\LoanApi.Domain\\LoanApi.Domain.csproj" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
   </ItemGroup>
 </Project>

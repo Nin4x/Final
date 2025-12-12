@@ -1,19 +1,13 @@
+using FluentValidation;
 using LoanApi.Application.DTOs;
-using LoanApi.Domain.Enums;
 
 namespace LoanApi.Application.Validation;
 
-public class UpdateLoanStatusRequestValidator
+public class UpdateLoanStatusRequestValidator : AbstractValidator<UpdateLoanStatusRequest>
 {
-    public ValidationResult Validate(UpdateLoanStatusRequest request)
+    public UpdateLoanStatusRequestValidator()
     {
-        var result = new ValidationResult();
-
-        if (!Enum.IsDefined(typeof(LoanStatus), request.Status))
-        {
-            result.Errors.Add("Unknown loan status.");
-        }
-
-        return result;
+        RuleFor(request => request.Status)
+            .IsInEnum().WithMessage("Unknown loan status.");
     }
 }

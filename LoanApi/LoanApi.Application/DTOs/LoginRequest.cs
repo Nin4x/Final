@@ -1,5 +1,5 @@
 namespace LoanApi.Application.DTOs;
 
 public record LoginRequest(
-    string Email,
+    string UsernameOrEmail,
     string Password);
