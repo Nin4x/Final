@@ -12,4 +12,7 @@ public class Loan
     public LoanStatus Status { get; set; } = LoanStatus.Draft;
     public DateTime CreatedOnUtc { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedOnUtc { get; set; }
+
+    public Guid? UserId { get; set; }
+    public User? User { get; set; }
 }
