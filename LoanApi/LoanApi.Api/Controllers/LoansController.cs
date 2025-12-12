@@ -1,3 +1,4 @@
+using LoanApi.Api.Extensions;
 using LoanApi.Application.DTOs;
 using LoanApi.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +22,9 @@ public class LoansController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<LoanResponse>>> GetLoans(CancellationToken cancellationToken)
     {
-        var loans = await _loanService.GetAllAsync(cancellationToken);
+        var currentUserId = User.GetUserId();
+        var role = User.GetUserRole();
+        var loans = await _loanService.GetAllAsync(currentUserId, role, cancellationToken);
         return Ok(loans);
     }
 
@@ -30,7 +33,9 @@ public class LoansController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<LoanResponse>> GetLoan(Guid id, CancellationToken cancellationToken)
     {
-        var loan = await _loanService.GetAsync(id, cancellationToken);
+        var currentUserId = User.GetUserId();
+        var role = User.GetUserRole();
+        var loan = await _loanService.GetAsync(id, currentUserId, role, cancellationToken);
         return loan is null ? NotFound() : Ok(loan);
     }
 
@@ -39,7 +44,9 @@ public class LoansController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<LoanResponse>> CreateLoan([FromBody] CreateLoanRequest request, CancellationToken cancellationToken)
     {
-        var created = await _loanService.CreateAsync(request, cancellationToken);
+        var currentUserId = User.GetUserId();
+        var role = User.GetUserRole();
+        var created = await _loanService.CreateAsync(currentUserId, role, request, cancellationToken);
         return CreatedAtAction(nameof(GetLoan), new { id = created.Id }, created);
     }
 
@@ -48,7 +55,9 @@ public class LoansController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<LoanResponse>> UpdateLoan(Guid id, [FromBody] UpdateLoanRequest request, CancellationToken cancellationToken)
     {
-        var updated = await _loanService.UpdateAsync(id, request, cancellationToken);
+        var currentUserId = User.GetUserId();
+        var role = User.GetUserRole();
+        var updated = await _loanService.UpdateAsync(id, currentUserId, role, request, cancellationToken);
         return updated is null ? NotFound() : Ok(updated);
     }
 
@@ -58,7 +67,20 @@ public class LoansController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<LoanResponse>> UpdateStatus(Guid id, [FromBody] UpdateLoanStatusRequest request, CancellationToken cancellationToken)
     {
-        var updated = await _loanService.UpdateStatusAsync(id, request, cancellationToken);
+        var currentUserId = User.GetUserId();
+        var role = User.GetUserRole();
+        var updated = await _loanService.UpdateStatusAsync(id, currentUserId, role, request, cancellationToken);
         return updated is null ? NotFound() : Ok(updated);
+    }
+
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteLoan(Guid id, CancellationToken cancellationToken)
+    {
+        var currentUserId = User.GetUserId();
+        var role = User.GetUserRole();
+        var deleted = await _loanService.DeleteAsync(id, currentUserId, role, cancellationToken);
+        return deleted ? NoContent() : NotFound();
     }
 }

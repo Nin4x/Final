@@ -8,4 +8,5 @@ public record UserResponse(
     string Email,
     DateTime CreatedOnUtc,
     DateTime? UpdatedOnUtc,
-    UserRole Role);
+    UserRole Role,
+    bool IsBlocked);

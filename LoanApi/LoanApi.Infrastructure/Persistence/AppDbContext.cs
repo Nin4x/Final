@@ -42,6 +42,9 @@ public class AppDbContext : DbContext
         userBuilder.Property(user => user.Role)
             .IsRequired();
 
+        userBuilder.Property(user => user.IsBlocked)
+            .IsRequired();
+
         userBuilder.Property(user => user.CreatedOnUtc).IsRequired();
         userBuilder.Property(user => user.UpdatedOnUtc);
 
