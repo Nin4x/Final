@@ -27,6 +27,6 @@ public class UsersController : ControllerBase
         var role = User.GetUserRole();
 
         var user = await _userService.GetByIdAsync(id, currentUserId, role, cancellationToken);
-        return user is null ? NotFound() : Ok(user);
+        return Ok(user);
     }
 }

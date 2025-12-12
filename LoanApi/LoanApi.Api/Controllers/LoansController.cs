@@ -36,7 +36,7 @@ public class LoansController : ControllerBase
         var currentUserId = User.GetUserId();
         var role = User.GetUserRole();
         var loan = await _loanService.GetAsync(id, currentUserId, role, cancellationToken);
-        return loan is null ? NotFound() : Ok(loan);
+        return Ok(loan);
     }
 
 [HttpPost]
@@ -59,7 +59,7 @@ public async Task<ActionResult<LoanResponse>> CreateLoan([FromBody] CreateLoanRe
         var currentUserId = User.GetUserId();
         var role = User.GetUserRole();
         var updated = await _loanService.UpdateAsync(id, currentUserId, role, request, cancellationToken);
-        return updated is null ? NotFound() : Ok(updated);
+        return Ok(updated);
     }
 
     [HttpDelete("{id:guid}")]
@@ -69,7 +69,7 @@ public async Task<ActionResult<LoanResponse>> CreateLoan([FromBody] CreateLoanRe
     {
         var currentUserId = User.GetUserId();
         var role = User.GetUserRole();
-        var deleted = await _loanService.DeleteAsync(id, currentUserId, role, cancellationToken);
-        return deleted ? NoContent() : NotFound();
+        await _loanService.DeleteAsync(id, currentUserId, role, cancellationToken);
+        return NoContent();
     }
 }
