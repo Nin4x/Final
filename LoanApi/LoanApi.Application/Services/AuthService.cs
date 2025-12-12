@@ -53,7 +53,7 @@ public class AuthService : IAuthService
             Id = Guid.NewGuid(),
             Username = request.Username.Trim(),
             Email = request.Email.Trim(),
-            Role = request.Role,
+            Role = UserRole.User,
             CreatedOnUtc = _dateTimeProvider.UtcNow
         };
 

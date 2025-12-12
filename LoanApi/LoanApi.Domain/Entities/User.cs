@@ -15,6 +15,8 @@ public class User
 
     public UserRole Role { get; set; } = UserRole.User;
 
+    public bool IsBlocked { get; set; }
+
     public DateTime CreatedOnUtc { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedOnUtc { get; set; }
