@@ -34,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<AccountantUserOptions>(configuration.GetSection(AccountantUserOptions.SectionName));
 
         return services;
     }
