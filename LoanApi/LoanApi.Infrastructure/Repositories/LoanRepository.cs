@@ -7,9 +7,9 @@ namespace LoanApi.Infrastructure.Repositories;
 
 public class LoanRepository : ILoanRepository
 {
-    private readonly LoanDbContext _context;
+    private readonly AppDbContext _context;
 
-    public LoanRepository(LoanDbContext context)
+    public LoanRepository(AppDbContext context)
     {
         _context = context;
     }
