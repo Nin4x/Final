@@ -30,10 +30,17 @@ public class ExceptionHandlingMiddleware : IMiddleware
 
     private static Task WriteProblemDetailsAsync(HttpContext context, Exception ex)
     {
-        var statusCode = ex is ValidationException ? HttpStatusCode.BadRequest : HttpStatusCode.InternalServerError;
+        var statusCode = ex switch
+        {
+            ValidationException => HttpStatusCode.BadRequest,
+            UnauthorizedAccessException => HttpStatusCode.Forbidden,
+            _ => HttpStatusCode.InternalServerError
+        };
+
         var detail = ex switch
         {
             ValidationException validationException => string.Join(" ", validationException.Errors.Select(error => error.ErrorMessage)),
+            UnauthorizedAccessException unauthorizedAccessException => unauthorizedAccessException.Message,
             ArgumentException argumentException => argumentException.Message,
             _ => "Please contact support if the issue persists."
         };
