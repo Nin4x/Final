@@ -1,3 +1,5 @@
+using LoanApi.Domain.Enums;
+
 namespace LoanApi.Application.DTOs;
 
 public record RegisterRequest(
@@ -5,4 +7,5 @@ public record RegisterRequest(
     string Email,
     string Password,
     int Age,
-    decimal MonthlyIncome);
+    decimal MonthlyIncome,
+    UserRole Role = UserRole.User);

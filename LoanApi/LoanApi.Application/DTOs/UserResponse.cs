@@ -1,3 +1,5 @@
+using LoanApi.Domain.Enums;
+
 namespace LoanApi.Application.DTOs;
 
 public record UserResponse(
@@ -5,4 +7,5 @@ public record UserResponse(
     string Username,
     string Email,
     DateTime CreatedOnUtc,
-    DateTime? UpdatedOnUtc);
+    DateTime? UpdatedOnUtc,
+    UserRole Role);

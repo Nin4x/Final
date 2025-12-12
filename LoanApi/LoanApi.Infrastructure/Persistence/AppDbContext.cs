@@ -39,6 +39,9 @@ public class AppDbContext : DbContext
             .IsRequired()
             .HasMaxLength(256);
 
+        userBuilder.Property(user => user.Role)
+            .IsRequired();
+
         userBuilder.Property(user => user.CreatedOnUtc).IsRequired();
         userBuilder.Property(user => user.UpdatedOnUtc);
 

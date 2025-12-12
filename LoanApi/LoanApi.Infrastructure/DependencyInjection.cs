@@ -1,7 +1,9 @@
 using LoanApi.Application.Interfaces;
+using LoanApi.Domain.Entities;
 using LoanApi.Infrastructure.Auth;
 using LoanApi.Infrastructure.Persistence;
 using LoanApi.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,7 +28,12 @@ public static class DependencyInjection
         });
 
         services.AddScoped<ILoanRepository, LoanRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
         return services;
     }
