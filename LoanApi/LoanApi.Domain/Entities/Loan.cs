@@ -8,7 +8,9 @@ public class Loan
     public string BorrowerName { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public decimal InterestRate { get; set; }
-    public int TermMonths { get; set; }
+    public int PeriodMonths { get; set; }
+    public LoanCurrency Currency { get; set; } = LoanCurrency.USD;
+    public LoanType Type { get; set; } = LoanType.Personal;
     public LoanStatus Status { get; set; } = LoanStatus.Processing;
     public DateTime CreatedOnUtc { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedOnUtc { get; set; }

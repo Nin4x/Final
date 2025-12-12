@@ -1,3 +1,4 @@
+using FluentValidation;
 using LoanApi.Application.Interfaces;
 using LoanApi.Application.Services;
 using LoanApi.Application.Validation;
@@ -12,9 +13,7 @@ public static class DependencyInjection
         services.AddAutoMapper(typeof(DependencyInjection).Assembly);
 
         services.AddScoped<ILoanService, LoanService>();
-        services.AddScoped<CreateLoanRequestValidator>();
-        services.AddScoped<UpdateLoanRequestValidator>();
-        services.AddScoped<UpdateLoanStatusRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
         return services;
     }
 }

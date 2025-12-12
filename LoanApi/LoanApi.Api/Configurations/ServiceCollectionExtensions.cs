@@ -1,5 +1,7 @@
+using FluentValidation.AspNetCore;
 using LoanApi.Api.Middleware;
 using LoanApi.Application;
+using LoanApi.Application.Validation;
 using LoanApi.Infrastructure;
 using Microsoft.OpenApi.Models;
 
@@ -14,7 +16,12 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ExceptionHandlingMiddleware>();
 
-        services.AddControllers();
+        services
+            .AddControllers();
+
+        services.AddFluentValidationAutoValidation();
+        services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {

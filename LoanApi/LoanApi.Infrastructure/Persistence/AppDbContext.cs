@@ -65,7 +65,9 @@ public class AppDbContext : DbContext
             .IsRequired()
             .HasPrecision(5, 2);
 
-        loanBuilder.Property(loan => loan.TermMonths).IsRequired();
+        loanBuilder.Property(loan => loan.PeriodMonths).IsRequired();
+        loanBuilder.Property(loan => loan.Currency).IsRequired();
+        loanBuilder.Property(loan => loan.Type).IsRequired();
         loanBuilder.Property(loan => loan.Status).IsRequired();
         loanBuilder.Property(loan => loan.CreatedOnUtc).IsRequired();
         loanBuilder.Property(loan => loan.UpdatedOnUtc);

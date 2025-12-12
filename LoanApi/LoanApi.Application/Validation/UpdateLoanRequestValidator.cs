@@ -1,33 +1,29 @@
+using FluentValidation;
 using LoanApi.Application.DTOs;
 
 namespace LoanApi.Application.Validation;
 
-public class UpdateLoanRequestValidator
+public class UpdateLoanRequestValidator : AbstractValidator<UpdateLoanRequest>
 {
-    public ValidationResult Validate(UpdateLoanRequest request)
+    public UpdateLoanRequestValidator()
     {
-        var result = new ValidationResult();
+        RuleFor(request => request.Amount)
+            .GreaterThan(0).WithMessage("Loan amount must be greater than zero.");
 
-        if (string.IsNullOrWhiteSpace(request.BorrowerName))
-        {
-            result.Errors.Add("Borrower name is required.");
-        }
+        RuleFor(request => request.Currency)
+            .IsInEnum().WithMessage("Currency is required and must be valid.");
 
-        if (request.Amount <= 0)
-        {
-            result.Errors.Add("Loan amount must be greater than zero.");
-        }
+        RuleFor(request => request.PeriodMonths)
+            .GreaterThan(0).WithMessage("Loan period must be greater than zero months.");
 
-        if (request.InterestRate <= 0)
-        {
-            result.Errors.Add("Interest rate must be greater than zero.");
-        }
+        RuleFor(request => request.Type)
+            .IsInEnum().WithMessage("Loan type must be valid.");
 
-        if (request.TermMonths <= 0)
-        {
-            result.Errors.Add("Term must be greater than zero months.");
-        }
+        RuleFor(request => request.InterestRate)
+            .GreaterThan(0).WithMessage("Interest rate must be greater than zero.");
 
-        return result;
+        RuleFor(request => request.BorrowerName)
+            .NotEmpty().WithMessage("Borrower name is required.")
+            .MaximumLength(200);
     }
 }
