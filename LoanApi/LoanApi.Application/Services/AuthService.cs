@@ -40,8 +40,8 @@ public class AuthService : IAuthService
     {
         await _registerValidator.ValidateAndThrowAsync(request, cancellationToken);
 
-        var existingUser = await _userRepository.GetByUsernameOrEmailAsync(request.Username, cancellationToken)
-            ?? await _userRepository.GetByUsernameOrEmailAsync(request.Email, cancellationToken);
+        var existingUser = await _userRepository.GetByUsernameAsync(request.Username, cancellationToken)
+            ?? await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
 
         if (existingUser is not null)
         {
@@ -59,7 +59,7 @@ public class AuthService : IAuthService
 
         user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
 
-        await _userRepository.AddAsync(user, cancellationToken);
+        await _userRepository.CreateAsync(user, cancellationToken);
 
         var tokenResult = _jwtTokenGenerator.GenerateToken(user);
         var userResponse = _mapper.Map<UserResponse>(user);
@@ -71,7 +71,8 @@ public class AuthService : IAuthService
     {
         await _loginValidator.ValidateAndThrowAsync(request, cancellationToken);
 
-        var user = await _userRepository.GetByUsernameOrEmailAsync(request.UsernameOrEmail, cancellationToken);
+        var user = await _userRepository.GetByUsernameAsync(request.UsernameOrEmail, cancellationToken)
+            ?? await _userRepository.GetByEmailAsync(request.UsernameOrEmail, cancellationToken);
         if (user is null)
         {
             throw new ValidationException("Invalid credentials.");
