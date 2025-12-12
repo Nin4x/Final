@@ -9,8 +9,11 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        services.AddAutoMapper(typeof(DependencyInjection).Assembly);
+
         services.AddScoped<ILoanService, LoanService>();
         services.AddScoped<CreateLoanRequestValidator>();
+        services.AddScoped<UpdateLoanRequestValidator>();
         services.AddScoped<UpdateLoanStatusRequestValidator>();
         return services;
     }

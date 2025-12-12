@@ -2,7 +2,7 @@ using LoanApi.Domain.Enums;
 
 namespace LoanApi.Application.DTOs;
 
-public record LoanDto(
+public record LoanResponse(
     Guid Id,
     string BorrowerName,
     decimal Amount,
@@ -10,4 +10,5 @@ public record LoanDto(
     int TermMonths,
     LoanStatus Status,
     DateTime CreatedOnUtc,
-    DateTime? UpdatedOnUtc);
+    DateTime? UpdatedOnUtc,
+    Guid? UserId);

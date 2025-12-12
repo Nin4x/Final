@@ -4,8 +4,9 @@ namespace LoanApi.Application.Interfaces;
 
 public interface ILoanService
 {
-    Task<LoanDto> CreateAsync(CreateLoanRequest request, CancellationToken cancellationToken = default);
-    Task<IReadOnlyCollection<LoanDto>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<LoanDto?> GetAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<LoanDto?> UpdateStatusAsync(Guid id, UpdateLoanStatusRequest request, CancellationToken cancellationToken = default);
+    Task<LoanResponse> CreateAsync(CreateLoanRequest request, CancellationToken cancellationToken = default);
+    Task<IReadOnlyCollection<LoanResponse>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<LoanResponse?> GetAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<LoanResponse?> UpdateAsync(Guid id, UpdateLoanRequest request, CancellationToken cancellationToken = default);
+    Task<LoanResponse?> UpdateStatusAsync(Guid id, UpdateLoanStatusRequest request, CancellationToken cancellationToken = default);
 }

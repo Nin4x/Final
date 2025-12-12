@@ -3,9 +3,10 @@ namespace LoanApi.Domain.Enums;
 public enum LoanStatus
 {
     Draft = 0,
-    Submitted = 1,
-    Approved = 2,
-    Rejected = 3,
-    Funded = 4,
-    Closed = 5
+    Processing = 1,
+    Submitted = 2,
+    Approved = 3,
+    Rejected = 4,
+    Funded = 5,
+    Closed = 6
 }

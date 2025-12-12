@@ -9,7 +9,7 @@ public class Loan
     public decimal Amount { get; set; }
     public decimal InterestRate { get; set; }
     public int TermMonths { get; set; }
-    public LoanStatus Status { get; set; } = LoanStatus.Draft;
+    public LoanStatus Status { get; set; } = LoanStatus.Processing;
     public DateTime CreatedOnUtc { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedOnUtc { get; set; }
 
