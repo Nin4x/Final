@@ -40,8 +40,13 @@ public class AuthService : IAuthService
     {
         await _registerValidator.ValidateAndThrowAsync(request, cancellationToken);
 
-        var existingUser = await _userRepository.GetByUsernameAsync(request.Username, cancellationToken)
-            ?? await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
+        var normalizedUsername = request.Username.Trim();
+        var normalizedEmail = request.Email.Trim();
+
+        var existingUser = await _userRepository.GetByUsernameAsync(normalizedUsername, cancellationToken)
+            ?? await _userRepository.GetByEmailAsync(normalizedEmail, cancellationToken)
+            ?? await _userRepository.GetByUsernameAsync(normalizedEmail, cancellationToken)
+            ?? await _userRepository.GetByEmailAsync(normalizedUsername, cancellationToken);
 
         if (existingUser is not null)
         {
@@ -51,8 +56,8 @@ public class AuthService : IAuthService
         var user = new User
         {
             Id = Guid.NewGuid(),
-            Username = request.Username.Trim(),
-            Email = request.Email.Trim(),
+            Username = normalizedUsername,
+            Email = normalizedEmail,
             Role = request.Role,
             CreatedOnUtc = _dateTimeProvider.UtcNow
         };
