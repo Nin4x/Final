@@ -39,16 +39,17 @@ public class LoansController : ControllerBase
         return loan is null ? NotFound() : Ok(loan);
     }
 
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<LoanResponse>> CreateLoan([FromBody] CreateLoanRequest request, CancellationToken cancellationToken)
-    {
-        var currentUserId = User.GetUserId();
-        var role = User.GetUserRole();
-        var created = await _loanService.CreateAsync(currentUserId, role, request, cancellationToken);
-        return CreatedAtAction(nameof(GetLoan), new { id = created.Id }, created);
-    }
+[HttpPost]
+[Authorize(Roles = "User")]
+[ProducesResponseType(StatusCodes.Status201Created)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+public async Task<ActionResult<LoanResponse>> CreateLoan([FromBody] CreateLoanRequest request, CancellationToken cancellationToken)
+{
+    var currentUserId = User.GetUserId();
+    var role = User.GetUserRole();
+    var created = await _loanService.CreateAsync(currentUserId, role, request, cancellationToken);
+    return CreatedAtAction(nameof(GetLoan), new { id = created.Id }, created);
+}
 
     [HttpPut("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -58,18 +59,6 @@ public class LoansController : ControllerBase
         var currentUserId = User.GetUserId();
         var role = User.GetUserRole();
         var updated = await _loanService.UpdateAsync(id, currentUserId, role, request, cancellationToken);
-        return updated is null ? NotFound() : Ok(updated);
-    }
-
-    [HttpPut("{id:guid}/status")]
-    [Authorize(Roles = "Accountant")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<LoanResponse>> UpdateStatus(Guid id, [FromBody] UpdateLoanStatusRequest request, CancellationToken cancellationToken)
-    {
-        var currentUserId = User.GetUserId();
-        var role = User.GetUserRole();
-        var updated = await _loanService.UpdateStatusAsync(id, currentUserId, role, request, cancellationToken);
         return updated is null ? NotFound() : Ok(updated);
     }
 

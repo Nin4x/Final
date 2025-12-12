@@ -74,7 +74,7 @@ public class LoanService : ILoanService
 
         if (currentUserRole != UserRole.Accountant && loan.UserId != currentUserId)
         {
-            return null;
+            throw new UnauthorizedAccessException("You are not allowed to view this loan.");
         }
 
         return _mapper.Map<LoanResponse>(loan);
@@ -94,7 +94,7 @@ public class LoanService : ILoanService
         {
             if (loan.UserId != currentUserId)
             {
-                return null;
+                throw new UnauthorizedAccessException("You are not allowed to update this loan.");
             }
 
             if (loan.Status != LoanStatus.Processing)
@@ -116,7 +116,7 @@ public class LoanService : ILoanService
 
         if (currentUserRole != UserRole.Accountant)
         {
-            throw new ValidationException("Only accountants can update loan status.");
+            throw new UnauthorizedAccessException("Only accountants can update loan status.");
         }
 
         var loan = await _repository.GetByIdAsync(id, cancellationToken);
@@ -144,7 +144,7 @@ public class LoanService : ILoanService
         {
             if (loan.UserId != currentUserId)
             {
-                return false;
+                throw new UnauthorizedAccessException("You are not allowed to delete this loan.");
             }
 
             if (loan.Status != LoanStatus.Processing)
