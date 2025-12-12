@@ -2,6 +2,7 @@ using LoanApi.Application.Interfaces;
 using LoanApi.Domain.Entities;
 using LoanApi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace LoanApi.Infrastructure.Repositories;
 
@@ -14,14 +15,26 @@ public class LoanRepository : ILoanRepository
         _context = context;
     }
 
-    public async Task<Loan> AddAsync(Loan loan, CancellationToken cancellationToken = default)
+    public async Task<Loan> CreateAsync(Loan loan, CancellationToken cancellationToken = default)
     {
         await _context.Loans.AddAsync(loan, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
         return loan;
     }
 
-    public async Task<IReadOnlyCollection<Loan>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(Loan loan, CancellationToken cancellationToken = default)
+    {
+        _context.Loans.Remove(loan);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<Loan>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var loans = await _context.Loans.AsNoTracking().Where(loan => loan.UserId == userId).ToListAsync(cancellationToken);
+        return loans;
+    }
+
+    public async Task<IReadOnlyCollection<Loan>> QueryAllAsync(CancellationToken cancellationToken = default)
     {
         var loans = await _context.Loans.AsNoTracking().ToListAsync(cancellationToken);
         return loans;

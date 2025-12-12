@@ -40,13 +40,13 @@ public class LoanService : ILoanService
         loan.Id = Guid.NewGuid();
         loan.CreatedOnUtc = _dateTimeProvider.UtcNow;
 
-        var created = await _repository.AddAsync(loan, cancellationToken);
+        var created = await _repository.CreateAsync(loan, cancellationToken);
         return _mapper.Map<LoanResponse>(created);
     }
 
     public async Task<IReadOnlyCollection<LoanResponse>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var loans = await _repository.GetAllAsync(cancellationToken);
+        var loans = await _repository.QueryAllAsync(cancellationToken);
         return loans.Select(loan => _mapper.Map<LoanResponse>(loan)).ToList();
     }
 
