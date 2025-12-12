@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoanApi.Domain", "LoanApi.D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoanApi.Infrastructure", "LoanApi.Infrastructure\\LoanApi.Infrastructure.csproj", "{CF642535-7C7C-4ECC-951F-DC483797278F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoanApi.Api.IntegrationTests", "LoanApi.Api.IntegrationTests\\LoanApi.Api.IntegrationTests.csproj", "{FDD92C8A-50A8-4261-8E22-B27E323FF37E}"
+EndProject
 Global
 GlobalSection(SolutionConfigurationPlatforms) = preSolution
 Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ GlobalSection(ProjectConfigurationPlatforms) = postSolution
 {CF642535-7C7C-4ECC-951F-DC483797278F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 {CF642535-7C7C-4ECC-951F-DC483797278F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 {CF642535-7C7C-4ECC-951F-DC483797278F}.Release|Any CPU.Build.0 = Release|Any CPU
+{FDD92C8A-50A8-4261-8E22-B27E323FF37E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+{FDD92C8A-50A8-4261-8E22-B27E323FF37E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+{FDD92C8A-50A8-4261-8E22-B27E323FF37E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+{FDD92C8A-50A8-4261-8E22-B27E323FF37E}.Release|Any CPU.Build.0 = Release|Any CPU
 EndGlobalSection
 GlobalSection(SolutionProperties) = preSolution
 HideSolutionNode = FALSE
