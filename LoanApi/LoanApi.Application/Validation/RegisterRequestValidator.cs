@@ -1,5 +1,6 @@
 using FluentValidation;
 using LoanApi.Application.DTOs;
+using LoanApi.Domain.Enums;
 
 namespace LoanApi.Application.Validation;
 
@@ -27,5 +28,8 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 
         RuleFor(request => request.MonthlyIncome)
             .GreaterThanOrEqualTo(0).WithMessage("Monthly income cannot be negative.");
+
+        RuleFor(request => request.Role)
+            .IsInEnum().WithMessage($"Role must be either {UserRole.User} or {UserRole.Accountant}.");
     }
 }

@@ -1,3 +1,4 @@
+using LoanApi.Domain.Enums;
 using System.Collections.Generic;
 
 namespace LoanApi.Domain.Entities;
@@ -11,6 +12,8 @@ public class User
     public string Email { get; set; } = string.Empty;
 
     public string PasswordHash { get; set; } = string.Empty;
+
+    public UserRole Role { get; set; } = UserRole.User;
 
     public DateTime CreatedOnUtc { get; set; } = DateTime.UtcNow;
 

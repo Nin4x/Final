@@ -1,11 +1,13 @@
 using LoanApi.Application.DTOs;
 using LoanApi.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LoanApi.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class LoansController : ControllerBase
 {
     private readonly ILoanService _loanService;
@@ -51,6 +53,7 @@ public class LoansController : ControllerBase
     }
 
     [HttpPut("{id:guid}/status")]
+    [Authorize(Roles = "Accountant")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<LoanResponse>> UpdateStatus(Guid id, [FromBody] UpdateLoanStatusRequest request, CancellationToken cancellationToken)

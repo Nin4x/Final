@@ -12,6 +12,7 @@ public static class DependencyInjection
     {
         services.AddAutoMapper(typeof(DependencyInjection).Assembly);
 
+        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ILoanService, LoanService>();
         services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
         return services;
