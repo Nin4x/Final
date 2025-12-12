@@ -24,7 +24,7 @@ public class ExceptionHandlingMiddleware : IMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception occurred");
+            _logger.LogError(ex, "Unhandled exception occurred while processing {RequestPath}", context.Request.Path);
             await WriteProblemDetailsAsync(context, ex);
         }
     }
